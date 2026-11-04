@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">鲸鱼娘 · 伴侣</string>
+
+    <string name="status_disconnected">未连接 · 点这里设置</string>
+    <string name="status_connecting">连接中…</string>
+    <string name="status_connected">已连接 · %1$s</string>
+    <string name="status_error">连接错误 · 点这里重连</string>
+
+    <string name="input_hint">跟鲸鱼娘说点什么…</string>
+    <string name="send">发送</string>
+    <string name="attach">添加附件</string>
+    <string name="task_mode_on">任务</string>
+    <string name="task_mode_off">聊天</string>
+
+    <string name="menu_change_bg">更换聊天背景</string>
+    <string name="menu_reset_bg">恢复默认背景</string>
+    <string name="menu_disconnect">断开连接</string>
+    <string name="menu_connect">连接手机</string>
+
+    <string name="connect_title">连接手机端</string>
+    <string name="connect_host_hint">手机 IP:端口，例如 192.168.1.5:8787</string>
+    <string name="connect_token_hint">配对码（手机端设置页可查看）</string>
+    <string name="connect_discover">搜索附近设备（同 Wi-Fi）</string>
+    <string name="connect_action">连接</string>
+    <string name="cancel">取消</string>
+
+    <string name="attach_title">发送给鲸鱼娘</string>
+    <string name="attach_image">发送图片</string>
+    <string name="attach_file">发送文件</string>
+
+    <string name="confirm_title">鲸鱼娘想先问你一句</string>
+    <string name="confirm_approve">确认执行</string>
+    <string name="confirm_deny">不要</string>
+
+    <string name="toast_not_connected">先连接手机端</string>
+    <string name="toast_image_too_large">图片太大（压缩后仍超过 4MB）</string>
+    <string name="toast_file_too_large">文件太大（上限 4MB）</string>
+    <string name="toast_bg_set">聊天背景已更新</string>
+    <string name="toast_bg_reset">已恢复默认背景</string>
+    <string name="toast_bg_failed">设置背景失败</string>
+</resources>

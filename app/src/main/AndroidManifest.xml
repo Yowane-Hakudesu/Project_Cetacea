@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ───────── 网络相关 ───────── -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- 局域网 mDNS 发现（部分设备没有这个锁会搜不到服务） -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
+    <!-- ───────── 前台服务与保活 ───────── -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- API 33+ 才有：不授予则常驻通知与任务进度通知都看不见 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- API 34+：specialUse 类型必须配套该权限 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- 引导用户把本应用加入电池优化白名单（Google Play 对该权限的使用有额外审核要求） -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- 可选但强烈建议：Android 10+ 从后台启动 Activity 的豁免条件之一，也是确认弹窗的兜底展示方式 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!--
+      包可见性（Android 11+）：不声明 <queries> 时，getLaunchIntentForPackage /
+      queryIntentActivities 对大多数第三方应用返回 null，open_app 会直接失效。
+      这里显式列出常见目标应用，并提供 MAIN/LAUNCHER 查询能力，用于按应用名解析包名。
+    -->
+    <queries>
+        <package android:name="com.tencent.mobileqq" />
+        <package android:name="com.tencent.qqlite" />
+        <package android:name="com.tencent.tim" />
+        <package android:name="com.tencent.mm" />
+        <package android:name="com.ss.android.ugc.aweme" />
+        <package android:name="com.ss.android.ugc.aweme.lite" />
+        <package android:name="com.smile.gifmaker" />
+        <package android:name="tv.danmaku.bili" />
+        <package android:name="com.xingin.xhs" />
+        <package android:name="com.sina.weibo" />
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".WhaleApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/ic_whale"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.WhaleChan"
+        android:usesCleartextTraffic="true">
+
+        <!--
+          usesCleartextTraffic=true 是为了支持局域网自建端点（Ollama / LM Studio / vLLM 常见形态
+          是 http://192.168.x.x:11434/v1）。代价：该 HTTP 通道上的 API Key 与对话内容是明文。
+          设置页会对此给出警告；上线版本可改成 network_security_config 只放行指定域名。
+        -->
+
+        <!-- ═══════════ 主界面（设置 + 权限引导） ═══════════ -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ═══════════ 对话界面 ═══════════ -->
+        <activity
+            android:name=".ui.ChatActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ═══════════ 敏感动作确认界面 ═══════════ -->
+        <activity
+            android:name=".ui.ConfirmActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.whalechan.agent.confirm" />
+
+        <!-- ═══════════ 伴侣模式（另一台设备连接本机） ═══════════ -->
+        <activity
+            android:name=".ui.CompanionActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ═══════════ 熄屏操控诊断 ═══════════ -->
+        <activity
+            android:name=".ui.DiagnosticsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity" />
+
+        <!-- ═══════════ 无障碍服务 ═══════════ -->
+        <service
+            android:name=".access.WhaleAccessibilityService"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <!-- ═══════════ 通知监听服务（QQ 消息回路） ═══════════ -->
+        <service
+            android:name=".notify.QqNotificationListener"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- ═══════════ 常驻前台服务 ═══════════ -->
+        <service
+            android:name=".service.KeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:stopWithTask="false">
+            <!--
+              API 34+ 强制要求：所有前台服务都必须在清单里声明类型。
+              specialUse 需要说明用途（Google Play 上架时会人工审核这段文字）。
+            -->
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="on_device_llm_agent: user-authorized accessibility automation and notification-based message relay running only while the user keeps the agent enabled" />
+        </service>
+
+        <!-- ═══════════ 开机 / 更新后自动恢复常驻服务 ═══════════ -->
+        <receiver
+            android:name=".service.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- ═══════════ 确认通知上的“确认 / 拒绝”按钮 ═══════════ -->
+        <receiver
+            android:name=".service.ConfirmActionReceiver"
+            android:exported="false" />
+
+        <!-- ═══════════ 步数上限暂停的“继续 / 放弃 / 停止” ═══════════ -->
+        <receiver
+            android:name=".service.TaskActionReceiver"
+            android:exported="false" />
+
+    </application>
+</manifest>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/whale_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🐋 熄屏操控诊断"
+            android:textColor="@color/whale_blue_dark"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="逐项检查：无障碍是否存活、电池优化是否豁免、通知权限、悬浮窗、WakeLock 与 WebSocket。缺哪项点对应按钮去补。"
+            android:textColor="@color/whale_text_secondary"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvDiagnostics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card"
+            android:padding="14dp"
+            android:text="检查中…"
+            android:textColor="@color/whale_text_primary"
+            android:textIsSelectable="true"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btnDiagA11y"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="去开启无障碍" />
+
+        <Button
+            android:id="@+id/btnDiagBattery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="去关闭电池优化" />
+
+        <Button
+            android:id="@+id/btnDiagNotif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="去开启通知使用权" />
+
+        <Button
+            android:id="@+id/btnDiagOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="去允许悬浮窗" />
+
+        <Button
+            android:id="@+id/btnDiagRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="重新检查" />
+
+        <Button
+            android:id="@+id/btnDiagCopy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="复制诊断信息" />
+    </LinearLayout>
+</ScrollView>

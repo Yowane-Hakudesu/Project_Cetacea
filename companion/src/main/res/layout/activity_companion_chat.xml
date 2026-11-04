@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/ivChatBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_chat_default" />
+
+    <View
+        android:id="@+id/vScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/scrim" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/whale_blue_dark"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="10dp">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_avatar_whale"
+                android:contentDescription="@null"
+                android:padding="4dp"
+                android:src="@drawable/ic_whale" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="鲸鱼娘"
+                    android:textColor="@color/white"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/status_disconnected"
+                    android:textColor="#C9D8FF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="菜单"
+                android:src="@drawable/ic_more" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMessages"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="6dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="6dp">
+
+            <ImageButton
+                android:id="@+id/btnAttach"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/attach"
+                android:src="@drawable/ic_attach" />
+
+            <EditText
+                android:id="@+id/etInput"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input_chat"
+                android:hint="@string/input_hint"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine|textCapSentences"
+                android:maxLines="4"
+                android:minHeight="44dp"
+                android:paddingStart="14dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="10dp"
+                android:textColor="@color/whale_text_primary"
+                android:textColorHint="@color/whale_text_secondary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/tvTaskMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_task_chip"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingStart="8dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="6dp"
+                android:text="@string/task_mode_off"
+                android:textColor="@color/whale_blue_dark"
+                android:textSize="12sp" />
+
+            <ImageButton
+                android:id="@+id/btnSend"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_send_button"
+                android:contentDescription="@string/send"
+                android:padding="9dp"
+                android:src="@drawable/ic_send" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

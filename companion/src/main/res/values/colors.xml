@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="whale_blue">#2F6FED</color>
+    <color name="whale_blue_dark">#16357A</color>
+    <color name="whale_blue_soft">#E8F0FF</color>
+    <color name="whale_bg">#F6F8FE</color>
+    <color name="whale_text_primary">#14203A</color>
+    <color name="whale_text_secondary">#5A6B8C</color>
+    <color name="whale_bubble">#FFFFFF</color>
+    <color name="whale_user_bubble">#2F6FED</color>
+    <color name="whale_user_text">#FFFFFF</color>
+    <color name="whale_divider">#DDE5F5</color>
+    <color name="white">#FFFFFF</color>
+    <color name="scrim">#26000000</color>
+</resources>

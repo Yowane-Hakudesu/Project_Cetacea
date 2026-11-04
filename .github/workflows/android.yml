@@ -1,0 +1,76 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          sdkmanager --install "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+          yes | sdkmanager --licenses > /dev/null || true
+
+      # 用 setup-gradle 安装固定版本，避免依赖 wrapper 的下载地址
+      # （仓库默认的 Tencent 镜像对境外 CI 可能较慢）
+      - name: Set up Gradle 8.10.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Unit tests
+        run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Lint
+        run: gradle :app:lintDebug :companion:lintDebug --no-daemon --stacktrace
+
+      - name: Assemble debug APKs
+        run: gradle :app:assembleDebug :companion:assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: whale-chan-debug-apks
+          if-no-files-found: error
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            companion/build/outputs/apk/debug/companion-debug.apk
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          if-no-files-found: ignore
+          path: |
+            app/build/reports/tests/
+            app/build/reports/lint-results-debug.html
+            companion/build/reports/lint-results-debug.html

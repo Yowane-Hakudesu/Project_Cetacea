@@ -1,0 +1,75 @@
+name: Bug 报告
+description: 报告可复现的问题（请先搜索已有 issue）
+title: "[Bug] "
+labels: [ "bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。提交前请确认：
+        - 已搜索过现有 issue；
+        - 日志与截图已打码（不要贴 API Key、聊天内容、手机号）；
+        - 这是**你自己的设备**上的问题。
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 设置页/伴侣端显示的版本号
+      placeholder: "0.3.1 (versionCode 4)"
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: 设备与系统
+      placeholder: "Xiaomi 14 / Android 15 (API 35)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: 出问题的模块
+      options:
+        - 手机端（被操控端）
+        - 伴侣端
+        - 两者都有
+        - 构建 / CI
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 开启无限模式 + 完成信任
+        2. 发送「干你想干的事情吧」
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 如果有 errorCategory / errorDetail，请一并贴上
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志（已打码）
+      render: text
+    validations:
+      required: false

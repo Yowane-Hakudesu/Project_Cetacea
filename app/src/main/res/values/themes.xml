@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.WhaleChan" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/whale_blue</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/whale_blue_soft</item>
+        <item name="colorOnPrimaryContainer">@color/whale_blue_dark</item>
+        <item name="colorSecondary">@color/whale_blue_dark</item>
+        <item name="android:windowBackground">@color/whale_bg</item>
+        <item name="android:statusBarColor">@color/whale_blue_dark</item>
+        <item name="android:navigationBarColor">@color/whale_bg</item>
+        <item name="android:textColorPrimary">@color/whale_text_primary</item>
+        <item name="android:textColorSecondary">@color/whale_text_secondary</item>
+    </style>
+
+    <style name="WhaleSectionTitle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/whale_blue_dark</item>
+        <item name="android:layout_marginTop">18dp</item>
+        <item name="android:layout_marginBottom">6dp</item>
+    </style>
+
+    <style name="WhaleCard">
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="WhaleInput">
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/whale_text_primary</item>
+        <item name="android:textColorHint">@color/whale_text_secondary</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+</resources>

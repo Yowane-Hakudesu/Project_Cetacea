@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 尾鳍 -->
+    <path
+        android:fillColor="#1B4FBF"
+        android:pathData="M22,52 C15,45 10,38 10,29 C19,32 27,40 31,49 Z" />
+
+    <!-- 喷水 -->
+    <path
+        android:pathData="M58,22 C58,14 62,9 69,7"
+        android:strokeColor="#8FB8FF"
+        android:strokeLineCap="round"
+        android:strokeWidth="3" />
+
+    <!-- 身体 -->
+    <path
+        android:fillColor="#2F6FED"
+        android:pathData="M55,20 C34,20 20,36 20,55 C20,75 36,89 57,89 C79,89 91,72 91,52 C91,33 74,20 55,20 Z" />
+
+    <!-- 肚皮 -->
+    <path
+        android:fillColor="#8FB8FF"
+        android:pathData="M38,74 C47,86 66,88 79,77 C73,89 51,94 38,81 Z" />
+
+    <!-- 眼白 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,45 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" />
+
+    <!-- 瞳孔 -->
+    <path
+        android:fillColor="#0B1F4B"
+        android:pathData="M45,46 m-2.6,0 a2.6,2.6 0 1,0 5.2,0 a2.6,2.6 0 1,0 -5.2,0" />
+
+    <!-- 嘴 -->
+    <path
+        android:pathData="M35,63 C42,69 51,70 58,67"
+        android:strokeColor="#16357A"
+        android:strokeLineCap="round"
+        android:strokeWidth="3" />
+
+    <!-- 腮红 -->
+    <path
+        android:fillColor="#FFB4C8"
+        android:pathData="M31,56 m-4,0 a4,3 0 1,0 8,0 a4,3 0 1,0 -8,0" />
+</vector>

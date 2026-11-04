@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/whale_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🐋 鲸鱼娘"
+            android:textColor="@color/whale_blue_dark"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="蓝色大肥鱼 · 端侧手机代理人"
+            android:textColor="@color/whale_text_secondary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="正在检查运行状态…"
+            android:textColor="@color/whale_text_secondary"
+            android:textSize="13sp" />
+
+        <!-- ════════ 权限 ════════ -->
+        <TextView
+            style="@style/WhaleSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="① 权限（必须由你手动授予）" />
+
+        <LinearLayout
+            style="@style/WhaleCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tvA11yStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="无障碍服务：检查中…"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="没有它：看不见界面，也无法点击 / 滑动 / 输入，所有自动化都失效。"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnA11y"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="去开启无障碍" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/whale_divider" />
+
+            <TextView
+                android:id="@+id/tvNotifStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="通知使用权：检查中…"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="没有它：收不到 QQ 通知，无法触发“收到消息 → 决定是否回复”的回路。"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnNotif"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="去开启通知使用权" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/whale_divider" />
+
+            <TextView
+                android:id="@+id/tvBatteryStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="电池优化豁免：检查中…"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="没有它：息屏后服务可能被 Doze 冻结，任务执行到一半卡住。"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnBattery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="去关闭电池优化" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/whale_divider" />
+
+            <TextView
+                android:id="@+id/tvOverlayStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="悬浮窗（可选）：检查中…"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="没有它：Android 10+ 在后台无法直接启动 QQ 等应用，open_app 会退化成“发通知请你点一下”。"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnOverlay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="去允许悬浮窗" />
+        </LinearLayout>
+
+        <!-- ════════ 常驻 ════════ -->
+        <TextView
+            style="@style/WhaleSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="② 常驻后台" />
+
+        <LinearLayout
+            style="@style/WhaleCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Switch
+                android:id="@+id/swKeepAlive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开机后自动恢复常驻服务"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvServiceStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="前台服务：未运行"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="13sp" />
+
+            <Switch
+                android:id="@+id/swAggressive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="空闲时也一直保持 CPU 唤醒（更耗电，默认关）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnService"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="启动常驻服务" />
+        </LinearLayout>
+
+        <!-- ════════ LLM ════════ -->
+        <TextView
+            style="@style/WhaleSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="③ 大模型（任意 OpenAI 兼容端点）" />
+
+        <LinearLayout
+            style="@style/WhaleCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/etBaseUrl"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Base URL，例如 https://api.deepseek.com/v1"
+                android:importantForAutofill="no"
+                android:inputType="textUri"
+                android:maxLines="1" />
+
+            <EditText
+                android:id="@+id/etApiKey"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="API Key（留空=不修改已保存的密钥）"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:maxLines="1" />
+
+            <EditText
+                android:id="@+id/etModelId"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Model ID，例如 deepseek-chat / gpt-4o-mini"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/etTemperature"
+                    style="@style/WhaleInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="温度 0~2"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="测试连接" />
+
+            <TextView
+                android:id="@+id/tvTestResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text=""
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- ════════ 行为 ════════ -->
+        <TextView
+            style="@style/WhaleSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="④ 行为与安全" />
+
+        <LinearLayout
+            style="@style/WhaleCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Switch
+                android:id="@+id/swAutoSend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="发消息免确认（默认关闭）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="关闭时，每条代发的 QQ 消息都会先弹确认；打开后由鲸鱼娘直接发送。付款、系统设置、删除类动作永远需要确认。"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+
+            <Switch
+                android:id="@+id/swVision"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="让视觉模型看截图（API 30+，更耗 token）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/swJsonMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="强制 JSON 输出模式（部分端点不支持）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/swCuriosity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="好奇模式：空闲时自己看看手机（默认关闭）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开启后每 45~90 分钟、且你 10 分钟没碰手机时，她会自己打开一个内容类应用看看，只能滑动和浏览，不能输入、发消息或进入设置。"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+
+            <Switch
+                android:id="@+id/swAutoReply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="QQ 消息自动决策是否回复"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/etAutoReplyWhitelist"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="只处理这些会话（逗号分隔，留空=全部）"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="2" />
+
+            <EditText
+                android:id="@+id/etAutoReplyCooldown"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="同一会话冷却秒数（默认 60）"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLines="1" />
+
+            <EditText
+                android:id="@+id/etPersona"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="补充人格设定（可选，例如：说话更简短一点）"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:minLines="2" />
+        </LinearLayout>
+
+        <!-- ════════ 步数与信任 ════════ -->
+        <TextView
+            style="@style/WhaleSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⑤ 步数策略与信任模式" />
+
+        <LinearLayout
+            style="@style/WhaleCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioGroup
+                android:id="@+id/rgStepPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/rbLimited"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="A 有限步数：到上限暂停并询问"
+                    android:textColor="@color/whale_text_primary"
+                    android:textSize="14sp" />
+
+                <RadioButton
+                    android:id="@+id/rbTimeWindow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="B 时间窗口：到点结束（不看步数）"
+                    android:textColor="@color/whale_text_primary"
+                    android:textSize="14sp" />
+
+                <RadioButton
+                    android:id="@+id/rbUnlimited"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="C 无限模式：只有完成 / 卡死 / 手动停止"
+                    android:textColor="@color/whale_text_primary"
+                    android:textSize="14sp" />
+            </RadioGroup>
+
+            <EditText
+                android:id="@+id/etMaxSteps"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="单任务最大步数 1–500（默认 50）"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLines="1" />
+
+            <EditText
+                android:id="@+id/etMaxRuntime"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="时间窗口分钟数（0 = 不限时，默认 30）"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLines="1" />
+
+            <EditText
+                android:id="@+id/etStallLimit"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="连续多少步界面不变算卡死（默认 15）"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLines="1" />
+
+            <EditText
+                android:id="@+id/etStallWindow"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="或：界面连续多少秒无变化算卡死（默认 30）"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLines="1" />
+
+            <Switch
+                android:id="@+id/swUnlimitedConsent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="我理解无限模式可能导致耗电与发热（仅 C 档需要）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/swCacheReplay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="SMART_LAZY：命中屏幕指纹时回放历史动作"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/swFullTrust"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="完全信任模式 FULL_TRUST（不弹任何确认）"
+                android:textColor="@color/whale_danger"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开启后：支付、授权、删除、改系统设置都不会再询问，直接执行。错误操作无法撤销，只能事后查日志。默认关闭；开启时需要输入“我理解”确认。"
+                android:textColor="@color/whale_danger"
+                android:textSize="12sp" />
+
+            <Switch
+                android:id="@+id/swAllowCredential"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="允许代填密码 / 验证码输入框（默认关闭）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="这是独立于 FULL_TRUST 的一道开关：即使完全信任，默认也不碰凭据输入框。"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- ════════ 远程伴侣 ════════ -->
+        <TextView
+            style="@style/WhaleSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⑥ 远程伴侣（局域网）" />
+
+        <LinearLayout
+            style="@style/WhaleCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Switch
+                android:id="@+id/swWsEnabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开启 WebSocket 服务端（被操控端）"
+                android:textColor="@color/whale_text_primary"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/etWsPort"
+                style="@style/WhaleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="端口（默认 8787）"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/tvWsStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="服务端：未运行"
+                android:textColor="@color/whale_text_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvToken"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_input"
+                android:padding="10dp"
+                android:text="配对码：—"
+                android:textColor="@color/whale_text_primary"
+                android:textIsSelectable="true"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnCopyToken"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="复制配对码" />
+
+                <Button
+                    android:id="@+id/btnRegenerateToken"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="重新生成" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnCompanion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="打开伴侣模式（在另一台设备上连接）" />
+
+            <Button
+                android:id="@+id/btnDiagnostics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="熄屏操控诊断" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="保存设置" />
+
+        <Button
+            android:id="@+id/btnChat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="和鲸鱼娘说话" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
