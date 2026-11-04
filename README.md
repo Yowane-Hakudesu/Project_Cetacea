@@ -1,6 +1,6 @@
-<<<<<<< HEAD
+
 # whale-chan-phone
-端侧 LLM 手机代理：无障碍自动化 + 通知监听 + 独立伴侣端（Kotlin/Android）
+端侧 LLM 手机代理：无障碍自动化 + 通知监听 + 独立伴侣端（Kotlin/Android） (本项目由DSH辅助完成)
 =======
 # 鲸鱼娘（Whale Chan）— 纯端侧 Android LLM 手机代理人
 
@@ -1148,5 +1148,6 @@ fun failureLine(category: ErrorCategory, detail: String): String {
 
 也可直接运行 `docs/PUBLISHING.md` 第 0 节的检查命令确认没有遗漏。
 >>>>>>> e021c90 (chore: initial public release v0.3.1)
-#   w h a l e - c h a n  
+#   w h a l e - c h a n 
+ 
  
