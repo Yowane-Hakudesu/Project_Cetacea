@@ -1,8 +1,6 @@
+## 鲸鱼娘（Whale Chan）— 纯端侧 Android LLM 手机代理人
 
-# whale-chan-phone
 端侧 LLM 手机代理：无障碍自动化 + 通知监听 + 独立伴侣端（Kotlin/Android） (本项目由DSH辅助完成)
-=======
-# 鲸鱼娘（Whale Chan）— 纯端侧 Android LLM 手机代理人
 
 [![Android CI](https://github.com/OWNER/REPO/actions/workflows/android.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/android.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -12,36 +10,29 @@
 > 应用代号：**鲸鱼娘** ｜ 拟人身份：蓝色大肥鱼
 > 形态：侧载 APK（无障碍 + 通知监听 + 前台服务）
 > 能力：用自然语言下任务 → LLM 规划 → 无障碍执行 → 反馈闭环
->
-> **开源：MIT。** 参与开发见 [CONTRIBUTING.md](CONTRIBUTING.md)，安全问题见 [SECURITY.md](SECURITY.md)，
-> 发布到 GitHub 的步骤见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。APK 请从 Releases 下载，不要提交进仓库。
->
-> **构建状态：v0.3.1（双 APK）已实际编译、测试、Lint 通过。** 2026-11-03 使用 Gradle 8.10.2 + JDK 21 +
-> AGP 8.7.3 + Android SDK 35 / Build Tools 35.0.0：
-> `app-debug.apk` **6.5 MB**（被操控端）、`companion-debug.apk` **5.6 MB**（独立伴侣端）；
-> 31 个 JVM 单元测试通过；两端 lint 均 **0 errors**。
-> **尚未做真机运行验证**（构建机没有连接设备），第 7.4、10.7、11.6、12.7 节是待执行的验收清单。
+
+**开源：MIT。** 参与开发见 [CONTRIBUTING.md](CONTRIBUTING.md)，安全问题见 [SECURITY.md](SECURITY.md)，发布到 GitHub 的步骤见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。APK 请从 Releases 下载，不要提交进仓库。
+
+**构建状态：v0.3.1（双 APK）已实际编译、测试、Lint 通过。** 2026-11-03 使用 Gradle 8.10.2 + JDK 21 + AGP 8.7.3 + Android SDK 35 / Build Tools 35.0.0：
+`app-debug.apk` **6.5 MB**（被操控端）、`companion-debug.apk` **5.6 MB**（独立伴侣端）；
+31 个 JVM 单元测试通过；两端 lint 均 **0 errors**。
+
+**尚未做真机运行验证**（构建机没有连接设备），第 7.4、10.7、11.6、12.7 节是待执行的验收清单。
 
 ---
 
-## 0. 先说结论（工程边界）
+## 0. 工程边界
 
-1. **“没有任何限制”在 Android 上不存在。** 后台启动 Activity（Android 10+）、包可见性（11+）、
-   通知与前台服务类型（13+/14+）、侧载应用的无障碍受限设置（13+）都是系统级硬约束。
-   本项目不做任何绕过，只在“用户显式授权 + 系统允许”的范围内工作。
-2. **QQ 没有面向第三方的消息 API。** 读取靠通知监听，发送靠无障碍模拟 UI。
-   这不是“读聊天记录”，也不是“调用 QQ 接口”，且无法保证 100% 送达。
-3. **不实现对抗检测。** 不做模拟人类随机轨迹、不隐藏无障碍服务、不篡改包名。
-   平台若判定为自动化，账号风险由用户承担。
-4. **默认“关键操作确认”，但它可以被显式关闭。** 付款、权限、系统设置、删除、代发消息默认都要用户点头；
-   设置页的 `FULL_TRUST` 开关（需输入“我理解”二次确认）会关掉所有操作前拦截，只保留日志。
-   密码 / 验证码代填另有独立开关，**即使 `FULL_TRUST` 也不会自动打开**。
+1. **“没有任何限制”在 Android 上不存在。** 后台启动 Activity（Android 10+）、包可见性（11+）、通知与前台服务类型（13+/14+）、侧载应用的无障碍受限设置（13+）都是系统级硬约束。本项目不做任何绕过，只在“用户显式授权 + 系统允许”的范围内工作。
+2. **QQ 没有面向第三方的消息 API。** 读取靠通知监听，发送靠无障碍模拟 UI。这不是“读聊天记录”，也不是“调用 QQ 接口”，且无法保证 100% 送达。
+3. **不实现对抗检测。** 不做模拟人类随机轨迹、不隐藏无障碍服务、不篡改包名。平台若判定为自动化，账号风险由用户承担。
+4. **默认“关键操作确认”，但它可以被显式关闭。** 付款、权限、系统设置、删除、代发消息默认都要用户点头；设置页的 `FULL_TRUST` 开关（需输入“我理解”二次确认）会关掉所有操作前拦截，只保留日志。密码 / 验证码代填另有独立开关，**即使 `FULL_TRUST` 也不会自动打开**。
 
 ---
 
 ## 1. 模块架构（文字版）
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │                           用户可见层                                   │
 │  MainActivity(设置/权限引导)   ChatActivity(对话+任务)   ConfirmActivity │
@@ -90,7 +81,6 @@
 │ BootReceiver             │   │ ConfirmationGate     │   │ SafetyPolicy     │
 │ 开机/更新/划掉后恢复      │   │ 通知+弹窗 双向确认    │   │ 三档风险判定      │
 └──────────────────────────┘   └──────────────────────┘   └──────────────────┘
-```
 
 ### 调用关系（一句话版）
 
