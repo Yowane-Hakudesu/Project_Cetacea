@@ -1,4 +1,4 @@
-# 🐋 Project_Cetacea (鲸鱼娘) - v0.3.1
+# 🐋 Project_Cetacea (鲸鱼娘) （鲸类计划）
 ![Android CI](https://img.shields.io/badge/Android%20CI-passing-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![minSdk](https://img.shields.io/badge/minSdk-26-green)
@@ -10,7 +10,7 @@
 
 **WhaleChan** 是一个运行在 Android 端的本地自动化 AI Agent。她常驻在你的手机后台，通过你配置的 LLM（大语言模型）进行思考，并利用 Android 无障碍服务（Accessibility Service）代替你操作手机（如打开 QQ、发消息、刷视频等）。
 
-从 v0.3.0 开始，她有了一个**独立的伴侣端 App**：你可以用另一台手机/平板跟她聊天、发图片和文件，随时叫停。
+从 v0.2.0 开始，她有了一个**独立的伴侣端 App**：你可以用另一台手机/平板跟她聊天、发图片和文件，随时叫停。
 
 当前版本：**v0.3.1**
 
@@ -63,7 +63,7 @@
 ## 🚀 快速开始 (新手教程)
 
 ### 1. 安装 App
-- 从 **Releases** 下载 `app-debug.apk`（手机端），需要伴侣功能再装 `companion-debug.apk`（另一台设备）；
+- 从 **Releases** 下载 `project_cetacea.apk`（手机端），需要伴侣功能再装 `companion.apk`（另一台设备）；
 - 或在 Actions 里下载构建产物 `whale-chan-debug-apks`。
 
 ### 2. 配置 LLM 大脑
@@ -72,7 +72,7 @@
 3. 填入你的 LLM 信息（推荐支持 JSON 输出的模型，如 GPT-4o、Claude 3.5、DeepSeek 等）。
    - **Base URL**: 例如 `https://api.openai.com/v1`
    - **API Key**: `sk-xxxxxx`
-   - **Model ID**: 例如 `deepseek-chat`
+   - **Model ID**: 例如 `deepseek-flash`
 4. 点击“测试连接”确保成功。
 
 ### 3. 授予权限并启动
