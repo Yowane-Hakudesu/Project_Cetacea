@@ -2,6 +2,7 @@ package com.whalechan.agent.core
 
 import android.content.Context
 import android.os.SystemClock
+import com.whalechan.agent.access.AppsLauncher
 import com.whalechan.agent.access.WhaleAccessibilityService
 import com.whalechan.agent.data.AppSettings
 import com.whalechan.agent.data.SettingsRepository
@@ -79,6 +80,11 @@ class AgentEngine(
     @Volatile
     private var lastActionResult: String = ""
 
+    /** 用户主动按了停止 → 不再从待处理信箱里自动取任务。 */
+    @Volatile
+    var userStopped: Boolean = false
+        private set
+
     private val stopFlag = AtomicBoolean(false)
 
     @Volatile
@@ -98,13 +104,14 @@ class AgentEngine(
         if (trimmed.isEmpty()) return false
 
         stopFlag.set(false)
+        userStopped = false
         job = scope.launch {
             try {
                 runTask(trimmed, mode)
             } catch (cancelled: CancellationException) {
                 // 区分“用户主动停”和“被系统/服务回收”：后者以前会被误报成“已停下，听你的。”
-                val userStopped = stopFlag.get()
-                val text = if (userStopped) {
+                val stoppedByUser = stopFlag.get()
+                val text = if (stoppedByUser) {
                     "已停下，听你的。"
                 } else {
                     Persona.failureLine(
@@ -112,9 +119,13 @@ class AgentEngine(
                         "任务被外部中断：服务或进程被系统回收（不是模型/界面判断）"
                     )
                 }
-                WhaleLog.w("任务被取消：userStopped=$userStopped")
+                WhaleLog.w("任务被取消：stoppedByUser=$stoppedByUser")
                 _state.update {
-                    it.copy(running = false, paused = false, lastMessage = if (userStopped) "已停止" else "被系统中断")
+                    it.copy(
+                        running = false,
+                        paused = false,
+                        lastMessage = if (stoppedByUser) "已停止" else "被系统中断"
+                    )
                 }
                 emit(AgentEvent.Finished(false, text))
             } catch (t: Throwable) {
@@ -129,6 +140,7 @@ class AgentEngine(
 
     fun cancel(reason: String = "用户停止") {
         stopFlag.set(true)
+        userStopped = true
         pauseContinuation?.complete(false)
         job?.cancel(CancellationException(reason))
         _state.update { it.copy(running = false, paused = false, lastMessage = reason) }
@@ -231,6 +243,10 @@ class AgentEngine(
         val history = mutableListOf<StepRecord>()
         val recordedDecisions = mutableListOf<AgentDecision>()
         val errorRetries = mutableMapOf<String, Int>()
+        val recentTexts = mutableListOf<String>()
+        var repeatRejections = 0
+        var currentEntity: String? = null
+        val focusedTask = isFocusTask(goal)
         var outcome: Pair<Boolean, String>? = null
         lastActionResult = ""
 
@@ -339,6 +355,16 @@ class AgentEngine(
                 null
             }
 
+            // 聊天页才提取好友名，避免把标题栏的其他文字误当成人名
+            currentEntity = if (SocialContext.isChatScreen(snapshot)) {
+                SocialContext.currentEntity(snapshot)
+            } else {
+                null
+            }
+            val recentActivity = runCatching {
+                AgentRuntime.social.recentActivityText(minutes = 30, limit = 12)
+            }.getOrDefault("")
+
             val prompt = PromptBuilder.buildUserPrompt(
                 goal = goal,
                 snapshot = snapshot,
@@ -350,7 +376,9 @@ class AgentEngine(
                 mode = mode,
                 hint = hint,
                 hasImage = image != null,
-                attachmentNote = attachmentNote
+                attachmentNote = attachmentNote,
+                currentEntity = currentEntity,
+                focused = focusedTask
             )
 
             val raw = try {
@@ -361,7 +389,8 @@ class AgentEngine(
                             memory.summaryForPrompt(),
                             config.personaExtra,
                             config.fullTrustMode,
-                            autonomous
+                            autonomous,
+                            recentActivity
                         ),
                         userPrompt = prompt,
                         maxTokens = 700,
@@ -391,6 +420,75 @@ class AgentEngine(
 
             val decision = DecisionParser.parse(raw)
             emit(AgentEvent.Planned(step, decision.oneLine()))
+
+            val newText = decision.text?.takeIf { it.isNotBlank() }
+
+            // ── 复读熔断：与最近 3 条已发文本相似度 ≥ 80% 直接拦截 ──
+            if (newText != null &&
+                (decision.type == ActionType.INPUT || decision.type == ActionType.REPLY_QQ)
+            ) {
+                val similarity = TextSimilarity.maxSimilarity(newText, recentTexts.takeLast(3))
+                if (similarity >= 0.8) {
+                    repeatRejections++
+                    failureStreak++
+                    lastActionResult =
+                        "ActionRejected: DuplicateText — 你刚刚已经说过" +
+                            "「${recentTexts.lastOrNull()?.take(15)}」了（相似度 ${(similarity * 100).toInt()}%）。" +
+                            "不要复读，换个话题或结束任务。"
+                    history += StepRecord(step, decision.oneLine(), lastActionResult, snapshot.packageName)
+                    appendLog(
+                        taskId, step, goal, "DUPLICATE_TEXT", decision.raw.take(800),
+                        beforeFingerprint, beforeFingerprint, "denied", ErrorCategory.UNKNOWN,
+                        lastActionResult, snapshot.render(800)
+                    )
+                    emit(AgentEvent.Notice("这句话刚说过，我拦下了。"))
+                    if (repeatRejections >= 3) {
+                        outcome = false to Persona.failureLine(
+                            ErrorCategory.STUCK,
+                            "连续 3 次复读，模型卡在同一个话题上"
+                        )
+                        break
+                    }
+                    continue
+                }
+            }
+
+            // ── 社交限流：FULL_TRUST 也拦，只拦频率，不做价值判断 ──
+            val socialPlan = SocialActionClassifier.classify(decision, snapshot, currentEntity)
+            if (socialPlan != null) {
+                if (socialPlan.textHash.isNotBlank() &&
+                    AgentRuntime.rateLimiter.isDuplicateCompletion(socialPlan.textHash)
+                ) {
+                    failureStreak++
+                    lastActionResult =
+                        "ActionRejected: DuplicateAction — 这个动作刚刚已经成功执行过" +
+                            "（${socialPlan.summary}），不要原地重复。"
+                    appendLog(
+                        taskId, step, goal, "DUPLICATE_ACTION", decision.raw.take(800),
+                        beforeFingerprint, beforeFingerprint, "denied", ErrorCategory.UNKNOWN,
+                        lastActionResult, snapshot.render(800)
+                    )
+                    emit(AgentEvent.Notice("这步刚做过，不重复了。"))
+                    continue
+                }
+
+                when (val verdict = AgentRuntime.rateLimiter.canExecute(socialPlan.type, socialPlan.targetKey)) {
+                    is RateVerdict.Rejected -> {
+                        failureStreak++
+                        lastActionResult = verdict.message
+                        history += StepRecord(step, decision.oneLine(), lastActionResult, snapshot.packageName)
+                        appendLog(
+                            taskId, step, goal, "RATE_LIMITED", decision.raw.take(800),
+                            beforeFingerprint, beforeFingerprint, "denied", ErrorCategory.UNKNOWN,
+                            verdict.message, snapshot.render(800)
+                        )
+                        emit(AgentEvent.Notice("先不发了：${verdict.message}"))
+                        continue
+                    }
+
+                    RateVerdict.Allowed -> Unit
+                }
+            }
 
             when (decision.type) {
                 ActionType.DONE -> {
@@ -555,7 +653,24 @@ class AgentEngine(
                 )
                 failureStreak = 0
                 errorRetries.clear()
+                repeatRejections = 0
                 lastActionResult = "上一步成功：${result.detail}"
+
+                if (newText != null) {
+                    recentTexts += newText
+                    if (recentTexts.size > 6) recentTexts.removeAt(0)
+                }
+                // reply_qq 由 QqReplyFlow 自己记账；评论/说说/转发在这里记账
+                if (socialPlan != null && socialPlan.type != SocialActionType.REPLY_MESSAGE) {
+                    runCatching {
+                        AgentRuntime.rateLimiter.record(
+                            type = socialPlan.type,
+                            targetKey = socialPlan.targetKey,
+                            summary = socialPlan.summary,
+                            textHash = socialPlan.textHash
+                        )
+                    }
+                }
             } else {
                 appendLog(
                     taskId, step, goal, decision.type.name, decision.raw.take(1000),
@@ -629,6 +744,9 @@ class AgentEngine(
             )
         )
         memory.recordTask(goal, summary, success)
+
+        // 任务结束后不要停在别人的聊天窗口里
+        leaveSocialAppIfNeeded(config)
 
         if (success && config.cacheReplayEnabled && !usedCache && recordedDecisions.isNotEmpty()) {
             cache.save(goal, initialFingerprint, recordedDecisions, summary)
@@ -800,6 +918,22 @@ class AgentEngine(
         lastActionResult = "我自行执行了一次兜底滑动（$reason），请观察新界面再决定。"
         return true
     }
+
+    /** 任务结束后如果还停在 QQ/TIM，主动回桌面，避免“赖在聊天窗口里”。 */
+    private suspend fun leaveSocialAppIfNeeded(config: AppSettings) {
+        if (!config.leaveSocialAppOnFinish) return
+        val service = WhaleAccessibilityService.instance ?: return
+        val pkg = service.currentPackage()
+        if (pkg !in AppsLauncher.QQ_PACKAGES) return
+        service.performHome()
+        delay(300)
+        emit(AgentEvent.Notice("任务结束，我先回桌面，不在聊天界面停留。"))
+    }
+
+    /** 开放式“刷视频/看内容”任务：提示模型不要被通知打断。 */
+    private fun isFocusTask(goal: String): Boolean =
+        listOf("刷视频", "刷抖音", "看视频", "看直播", "刷快手", "刷B站", "刷b站", "看番", "刷剧")
+            .any { goal.contains(it, ignoreCase = true) }
 
     private fun greeting(goal: String, mode: RunMode, policy: StepPolicy, maxSteps: Int): String =
         when (mode) {

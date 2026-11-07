@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  通知栏小图标（SVG，可直接在网页转 PNG）
+
+  对应 app/src/main/res/drawable/ic_stat_whale.xml。
+  **必须是纯白 + 透明背景**：Android 会把通知小图标当作 alpha 掩码处理，
+  填了彩色也会被涂成单色，所以这里只保留身体的剪影。
+
+  转换建议：导出 24×24 / 96×96（mdpi~xxxhdpi 五档）PNG，背景务必透明。
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="96"
+     height="96"
+     viewBox="0 0 108 108"
+     fill="none">
+
+  <!-- 尾鳍 -->
+  <path fill="#FFFFFF"
+        d="M22,52 C15,45 10,38 10,29 C19,32 27,40 31,49 Z"/>
+
+  <!-- 身体 -->
+  <path fill="#FFFFFF"
+        d="M55,20 C34,20 20,36 20,55 C20,75 36,89 57,89 C79,89 91,72 91,52 C91,33 74,20 55,20 Z"/>
+</svg>

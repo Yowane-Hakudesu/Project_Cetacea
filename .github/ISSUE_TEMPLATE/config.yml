@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 安全问题（请不要公开）
-    url: https://github.com/OWNER/REPO/security/advisories/new
+    url: https://github.com/Yowane-Hakudesu/Project_Cetacea/security/advisories/new
     about: 请使用私密漏洞报告，不要开公开 issue。
   - name: 使用文档
-    url: https://github.com/OWNER/REPO/blob/main/README.md
+    url: https://github.com/Yowane-Hakudesu/Project_Cetacea/blob/main/README.md
     about: 权限、构建、验收清单都在 README。

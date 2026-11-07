@@ -67,7 +67,7 @@ cd whale-chan
 git init
 git add .
 git status                 # 再确认一次没有敏感文件
-git commit -m "chore: initial public release v0.3.1"
+git commit -m "chore: initial public release v0.4.0"
 git branch -M main
 git remote add origin https://github.com/<你的用户名>/whale-chan.git
 git push -u origin main
@@ -98,14 +98,14 @@ git remote set-url origin git@github.com:<你的用户名>/whale-chan.git
 APK 不要提交进 Git（`.gitignore` 已排除 `*.apk`），放 Release 附件：
 
 ```bash
-git tag -a v0.3.1 -m "v0.3.1: 修复无限模式跨应用任务过早中断"
-git push origin v0.3.1
+git tag -a v0.4.0 -m "v0.4.0: 修复无限模式跨应用任务过早中断"
+git push origin v0.4.0
 ```
 
 GitHub → 仓库右侧 **Releases** → **Draft a new release**：
 
-1. Choose a tag：`v0.3.1`；
-2. Title：`v0.3.1`；
+1. Choose a tag：`v0.4.0`；
+2. Title：`v0.4.0`；
 3. 描述：从 `CHANGELOG.md` 粘贴对应段落；
 4. 附件上传：
    - `app/build/outputs/apk/debug/app-debug.apk`

@@ -3,6 +3,7 @@ package com.whalechan.agent.core
 import android.content.Context
 import com.whalechan.agent.data.SettingsRepository
 import com.whalechan.agent.data.log.StepLogRepository
+import com.whalechan.agent.data.social.SocialMemoryRepository
 
 /**
  * 进程内单例装配点。
@@ -18,6 +19,12 @@ object AgentRuntime {
         private set
 
     lateinit var logs: StepLogRepository
+        private set
+
+    lateinit var social: SocialMemoryRepository
+        private set
+
+    lateinit var rateLimiter: ActionRateLimiter
         private set
 
     lateinit var cache: ActionCache
@@ -37,6 +44,8 @@ object AgentRuntime {
             settings = SettingsRepository(appContext)
             memory = MemoryStore(appContext)
             logs = StepLogRepository(appContext)
+            social = SocialMemoryRepository(appContext)
+            rateLimiter = ActionRateLimiter(social)
             cache = ActionCache(appContext)
             engine = AgentEngine(appContext, settings, memory, logs, cache)
             initialized = true

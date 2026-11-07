@@ -29,9 +29,15 @@ class SettingsRepository(context: Context) {
             fullTrustMode = prefs.getBoolean(KEY_FULL_TRUST, d.fullTrustMode),
             allowCredentialEntry = prefs.getBoolean(KEY_ALLOW_CREDENTIAL, d.allowCredentialEntry),
             cacheReplayEnabled = prefs.getBoolean(KEY_CACHE_REPLAY, d.cacheReplayEnabled),
+            leaveSocialAppOnFinish = prefs.getBoolean(KEY_LEAVE_SOCIAL, d.leaveSocialAppOnFinish),
 
             wsEnabled = prefs.getBoolean(KEY_WS_ENABLED, d.wsEnabled),
             wsPort = prefs.getInt(KEY_WS_PORT, d.wsPort),
+            relayEnabled = prefs.getBoolean(KEY_RELAY_ENABLED, d.relayEnabled),
+            relayUrl = prefs.getString(KEY_RELAY_URL, d.relayUrl) ?: d.relayUrl,
+            relayToken = prefs.getString(KEY_RELAY_TOKEN, d.relayToken) ?: d.relayToken,
+            pairCode = prefs.getString(KEY_PAIR_CODE, null)?.takeIf { it.isNotBlank() }
+                ?: newPairCode().also { prefs.edit().putString(KEY_PAIR_CODE, it).apply() },
 
             logRetentionDays = prefs.getInt(KEY_LOG_DAYS, d.logRetentionDays),
             logMaxRows = prefs.getInt(KEY_LOG_ROWS, d.logMaxRows),
@@ -65,8 +71,13 @@ class SettingsRepository(context: Context) {
             .putBoolean(KEY_FULL_TRUST, s.fullTrustMode)
             .putBoolean(KEY_ALLOW_CREDENTIAL, s.allowCredentialEntry)
             .putBoolean(KEY_CACHE_REPLAY, s.cacheReplayEnabled)
+            .putBoolean(KEY_LEAVE_SOCIAL, s.leaveSocialAppOnFinish)
             .putBoolean(KEY_WS_ENABLED, s.wsEnabled)
             .putInt(KEY_WS_PORT, s.wsPort)
+            .putBoolean(KEY_RELAY_ENABLED, s.relayEnabled)
+            .putString(KEY_RELAY_URL, s.relayUrl)
+            .putString(KEY_RELAY_TOKEN, s.relayToken)
+            .putString(KEY_PAIR_CODE, s.pairCode)
             .putInt(KEY_LOG_DAYS, s.logRetentionDays)
             .putInt(KEY_LOG_ROWS, s.logMaxRows)
             .putBoolean(KEY_KEEP_ALIVE, s.keepAliveEnabled)
@@ -122,6 +133,16 @@ class SettingsRepository(context: Context) {
         return token
     }
 
+    /** 中继房间号：手机端生成，伴侣端输入同一个即可配对。 */
+    fun newPairCode(): String =
+        (1..6).map { "0123456789ABCDEFGHJKMNPQRSTUVWXYZ".random() }.joinToString("")
+
+    fun regeneratePairCode(): String {
+        val code = newPairCode()
+        prefs.edit().putString(KEY_PAIR_CODE, code).apply()
+        return code
+    }
+
     companion object {
         private const val PREF_NAME = "whale_settings"
         private const val KEY_BASE_URL = "base_url"
@@ -136,8 +157,13 @@ class SettingsRepository(context: Context) {
         private const val KEY_FULL_TRUST = "full_trust_mode"
         private const val KEY_ALLOW_CREDENTIAL = "allow_credential_entry"
         private const val KEY_CACHE_REPLAY = "cache_replay_enabled"
+        private const val KEY_LEAVE_SOCIAL = "leave_social_app_on_finish"
         private const val KEY_WS_ENABLED = "ws_enabled"
         private const val KEY_WS_PORT = "ws_port"
+        private const val KEY_RELAY_ENABLED = "relay_enabled"
+        private const val KEY_RELAY_URL = "relay_url"
+        private const val KEY_RELAY_TOKEN = "relay_token"
+        private const val KEY_PAIR_CODE = "pair_code"
         private const val KEY_LOG_DAYS = "log_retention_days"
         private const val KEY_LOG_ROWS = "log_max_rows"
         private const val KEY_KEEP_ALIVE = "keep_alive_enabled"

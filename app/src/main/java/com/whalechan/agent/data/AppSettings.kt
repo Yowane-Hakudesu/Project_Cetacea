@@ -34,10 +34,17 @@ data class AppSettings(
     val allowCredentialEntry: Boolean = false,
     /** 屏幕指纹命中时优先回放历史动作序列（SMART_LAZY） */
     val cacheReplayEnabled: Boolean = true,
+    /** 任务结束后若停在 QQ/TIM，主动回桌面 */
+    val leaveSocialAppOnFinish: Boolean = true,
 
     // ── 远程伴侣 ──
     val wsEnabled: Boolean = false,
     val wsPort: Int = 8787,
+    /** 校园网/蜂窝网穿透：手机主动连公网中继 */
+    val relayEnabled: Boolean = false,
+    val relayUrl: String = "",
+    val relayToken: String = "",
+    val pairCode: String = "",
 
     // ── 日志 ──
     val logRetentionDays: Int = 7,

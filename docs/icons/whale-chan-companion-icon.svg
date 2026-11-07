@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  伴侣端 应用图标（SVG，可直接在网页转 PNG）
+
+  与 companion/src/main/res/drawable/ic_whale.xml 对应（精简版：无喷水/腮红），
+  底色换成薄荷绿，用来和手机端在桌面上区分开。
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512"
+     height="512"
+     viewBox="0 0 108 108"
+     fill="none">
+
+  <!-- 圆形底色 -->
+  <circle cx="54" cy="54" r="54" fill="#E6F7F0"/>
+
+  <!-- 尾鳍 -->
+  <path fill="#1B7F5F"
+        d="M22,52 C15,45 10,38 10,29 C19,32 27,40 31,49 Z"/>
+
+  <!-- 身体 -->
+  <path fill="#2FB98D"
+        d="M55,20 C34,20 20,36 20,55 C20,75 36,89 57,89 C79,89 91,72 91,52 C91,33 74,20 55,20 Z"/>
+
+  <!-- 肚皮 -->
+  <path fill="#9FE6C8"
+        d="M38,74 C47,86 66,88 79,77 C73,89 51,94 38,81 Z"/>
+
+  <!-- 眼白 -->
+  <circle cx="44" cy="45" r="6" fill="#FFFFFF"/>
+
+  <!-- 瞳孔 -->
+  <circle cx="45" cy="46" r="2.6" fill="#0B2B22"/>
+
+  <!-- 嘴 -->
+  <path d="M35,63 C42,69 51,70 58,67"
+        stroke="#0F5C45"
+        stroke-width="3"
+        stroke-linecap="round"/>
+</svg>

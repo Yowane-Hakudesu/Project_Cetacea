@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  鲸鱼娘 应用图标（SVG，可直接在网页转 PNG）
+
+  与 app/src/main/res/drawable/ic_whale.xml 一一对应：
+    尾鳍 #1B4FBF / 身体 #2F6FED / 肚皮 #8FB8FF / 眼白 #FFFFFF
+    瞳孔 #0B1F4B / 嘴 #16357A / 喷水 #8FB8FF / 腮红 #FFB4C8
+
+  转换建议（导出正方形 PNG，用于 Google Play 512×512 或图标底图）：
+    512×512、1024×1024；背景默认透明，想用底色可取消下面 <rect> 的注释。
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512"
+     height="512"
+     viewBox="0 0 108 108"
+     fill="none">
+
+  <!-- 可选：圆形底色。想换成自适应图标的前景层时保持注释状态 -->
+  <!--
+  <circle cx="54" cy="54" r="54" fill="#E8F0FF"/>
+  -->
+
+  <!-- 尾鳍 -->
+  <path fill="#1B4FBF"
+        d="M22,52 C15,45 10,38 10,29 C19,32 27,40 31,49 Z"/>
+
+  <!-- 喷水 -->
+  <path d="M58,22 C58,14 62,9 69,7"
+        stroke="#8FB8FF"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <!-- 身体 -->
+  <path fill="#2F6FED"
+        d="M55,20 C34,20 20,36 20,55 C20,75 36,89 57,89 C79,89 91,72 91,52 C91,33 74,20 55,20 Z"/>
+
+  <!-- 肚皮 -->
+  <path fill="#8FB8FF"
+        d="M38,74 C47,86 66,88 79,77 C73,89 51,94 38,81 Z"/>
+
+  <!-- 眼白 -->
+  <circle cx="44" cy="45" r="6" fill="#FFFFFF"/>
+
+  <!-- 瞳孔 -->
+  <circle cx="45" cy="46" r="2.6" fill="#0B1F4B"/>
+
+  <!-- 嘴 -->
+  <path d="M35,63 C42,69 51,70 58,67"
+        stroke="#16357A"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <!-- 腮红 -->
+  <ellipse cx="31" cy="56" rx="4" ry="3" fill="#FFB4C8"/>
+</svg>

@@ -72,6 +72,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvToken: TextView
     private lateinit var btnCopyToken: Button
     private lateinit var btnRegenerateToken: Button
+    private lateinit var swRelayEnabled: Switch
+    private lateinit var etRelayUrl: EditText
+    private lateinit var etRelayToken: EditText
+    private lateinit var tvPairCode: TextView
+    private lateinit var btnRegeneratePairCode: Button
     private lateinit var btnCompanion: Button
     private lateinit var btnDiagnostics: Button
 
@@ -157,6 +162,11 @@ class MainActivity : AppCompatActivity() {
         btnRegenerateToken = findViewById(R.id.btnRegenerateToken)
         btnCompanion = findViewById(R.id.btnCompanion)
         btnDiagnostics = findViewById(R.id.btnDiagnostics)
+        swRelayEnabled = findViewById(R.id.swRelayEnabled)
+        etRelayUrl = findViewById(R.id.etRelayUrl)
+        etRelayToken = findViewById(R.id.etRelayToken)
+        tvPairCode = findViewById(R.id.tvPairCode)
+        btnRegeneratePairCode = findViewById(R.id.btnRegeneratePairCode)
 
         btnSave = findViewById(R.id.btnSave)
         btnChat = findViewById(R.id.btnChat)
@@ -190,6 +200,10 @@ class MainActivity : AppCompatActivity() {
         swAllowCredential.isChecked = s.allowCredentialEntry
         swWsEnabled.isChecked = s.wsEnabled
         etWsPort.setText(s.wsPort.toString())
+        swRelayEnabled.isChecked = s.relayEnabled
+        etRelayUrl.setText(s.relayUrl)
+        etRelayToken.setText(s.relayToken)
+        tvPairCode.text = "中继配对码：${s.pairCode}"
 
         when (StepPolicy.from(s.stepPolicy)) {
             StepPolicy.LIMITED -> rgStepPolicy.check(R.id.rbLimited)
@@ -289,6 +303,34 @@ class MainActivity : AppCompatActivity() {
             persist(showToast = false)
             refreshStatus()
         }
+
+        // 公网中继：改开关立即生效
+        swRelayEnabled.setOnCheckedChangeListener { _, checked ->
+            if (restoringUi) return@setOnCheckedChangeListener
+            if (checked) {
+                val url = etRelayUrl.text.toString().trim()
+                if (url.isBlank()) {
+                    toast("先填中继地址，例如 wss://relay.example.com/ws")
+                    swRelayEnabled.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
+                persist(showToast = false)
+                val port = etWsPort.text.toString().toIntOrNull()?.coerceIn(1024, 65535) ?: 8787
+                WsHub.start(this, port)
+                toast("正在连接中继…")
+            } else {
+                persist(showToast = false)
+                if (!swWsEnabled.isChecked) WsHub.stop()
+                toast("中继已关闭")
+            }
+            refreshStatus()
+        }
+
+        btnRegeneratePairCode.setOnClickListener {
+            val code = AgentRuntime.settings.regeneratePairCode()
+            tvPairCode.text = "中继配对码：$code"
+            toast("新的中继配对码：$code")
+        }
     }
 
     // ────────────────────────── 设置读写 ──────────────────────────
@@ -315,6 +357,10 @@ class MainActivity : AppCompatActivity() {
             allowCredentialEntry = swAllowCredential.isChecked,
             wsEnabled = swWsEnabled.isChecked,
             wsPort = etWsPort.text.toString().toIntOrNull() ?: current.wsPort,
+            relayEnabled = swRelayEnabled.isChecked,
+            relayUrl = etRelayUrl.text.toString().trim(),
+            relayToken = etRelayToken.text.toString().trim(),
+            pairCode = current.pairCode,
             keepAliveEnabled = swKeepAlive.isChecked,
             aggressiveWakeLock = swAggressive.isChecked,
             autoSendWithoutConfirm = swAutoSend.isChecked,
@@ -446,11 +492,12 @@ class MainActivity : AppCompatActivity() {
         val token = AgentRuntime.settings.pairingToken()
         tvToken.text = "配对码：$token"
 
-        tvWsStatus.text = if (WsHub.isRunning) {
+        tvWsStatus.text = if (WsHub.isRunning || WsHub.relayState != "OFF") {
             val addresses = WsHub.localAddresses().joinToString(" / ").ifBlank { "未知地址" }
-            "服务端：运行中 · 端口 ${WsHub.port} · 连接数 ${WsHub.clientCount()}\n地址：$addresses"
+            "服务端：${if (WsHub.isRunning) "运行中" else "未运行"} · 端口 ${WsHub.port} · 连接数 ${WsHub.clientCount()}\n" +
+                "地址：$addresses\n中继：${WsHub.relayState}"
         } else {
-            "服务端：未运行"
+            "服务端：未运行 · 中继：未启用"
         }
 
         val runState = AgentRuntime.engine.state.value

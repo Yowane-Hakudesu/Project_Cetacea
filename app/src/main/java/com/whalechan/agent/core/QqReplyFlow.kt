@@ -8,6 +8,7 @@ import com.whalechan.agent.access.WhaleAccessibilityService
 import com.whalechan.agent.data.log.ErrorCategory
 import com.whalechan.agent.notify.ReplyLedger
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 /**
  * “在 QQ 里回一条消息”的确定性流程。
@@ -15,14 +16,14 @@ import kotlinx.coroutines.delay
  * 为什么不用 LLM 逐步摸索：这条路径步骤固定、失败点明确，写成确定性流程成功率更高；
  * LLM 只负责决定“回给谁、回什么”，不负责点哪。
  *
- * 步骤：确保 QQ 在前台 → 定位会话 → 找到输入框 → ACTION_SET_TEXT → 点“发送” → 检查界面是否出现该消息。
- * 每一步都可能失败：QQ 改版、登录态失效、青少年模式、输入框换成自绘控件、发送按钮换图标。
- * 失败时明确返回原因，绝不假装成功。
+ * 步骤：确认 QQ 在前台 → 定位会话 → 找到输入框 → 按句拆分逐条发送（每段 ≤15 字，
+ * 间隔 1.5~3 秒）→ 每条都校验是否出现在聊天列表 → 记入社交账本（供限流与记忆使用）。
  */
 object QqReplyFlow {
 
     private const val LAUNCH_TIMEOUT_MS = 10_000L
     private const val INPUT_TIMEOUT_MS = 8_000L
+    private const val SEND_SETTLE_MS = 1_300L
 
     suspend fun reply(context: Context, conversation: String, text: String): ExecResult {
         val service = WhaleAccessibilityService.instance
@@ -40,11 +41,12 @@ object QqReplyFlow {
         if (snapshot.packageName !in AppsLauncher.QQ_PACKAGES) {
             val packageName = AppsLauncher.QQ_PACKAGES
                 .firstOrNull { AppsLauncher.isInstalled(context, it) }
-                ?: return ExecResult.fail("设备上没有找到 QQ / TIM", ErrorCategory.NODE_NOT_FOUND)
+                ?: return ExecResult.fail("设备上没找到 QQ / TIM", ErrorCategory.NODE_NOT_FOUND)
 
             when (val result = AppsLauncher.launch(context, packageName)) {
                 is AppsLauncher.Result.Failed ->
                     return ExecResult.fail(result.message, ErrorCategory.UNKNOWN)
+
                 is AppsLauncher.Result.NeedUserGesture -> {
                     AppsLauncher.notifyToOpen(context, packageName)
                     return ExecResult.fail(
@@ -52,6 +54,7 @@ object QqReplyFlow {
                         ErrorCategory.PERMISSION_LOST
                     )
                 }
+
                 is AppsLauncher.Result.Ok -> Unit
             }
 
@@ -70,44 +73,76 @@ object QqReplyFlow {
             )
         }
 
-        // ③ 写入输入框
-        val input = awaitEditable(service, INPUT_TIMEOUT_MS)
-            ?: return ExecResult.fail("没有找到聊天输入框，QQ 界面可能改版了", ErrorCategory.NODE_NOT_FOUND)
-        if (!service.setText(input, text)) {
-            return ExecResult.fail(
-                "输入框拒绝写入（可能是安全输入框，或 QQ 的防自动化限制）",
-                ErrorCategory.UNKNOWN
+        // ③ 按句拆分，逐条发送
+        val segments = TextSegmenter.split(text)
+        if (segments.isEmpty()) {
+            return ExecResult.fail("回复内容拆分为空", ErrorCategory.LLM_INVALID_ACTION)
+        }
+
+        val sent = ArrayList<String>(segments.size)
+        for ((index, segment) in segments.withIndex()) {
+            val input = awaitEditable(service, INPUT_TIMEOUT_MS)
+                ?: return partial(conversation, sent, "没有找到聊天输入框，QQ 界面可能改版了")
+
+            if (!service.setText(input, segment)) {
+                return partial(conversation, sent, "输入框拒绝写入（可能是安全输入框，或 QQ 的防自动化限制）")
+            }
+            delay(350)
+
+            if (!tapSend(service)) {
+                return partial(conversation, sent, "没有找到“发送”按钮，QQ 界面可能改版了")
+            }
+            delay(SEND_SETTLE_MS)
+
+            // ④ 完成判定：必须出现在非输入框节点里
+            val after = service.snapshot()
+            if (!appeared(after, segment)) {
+                return partial(conversation, sent, "点了发送，但界面上没有出现「${segment.take(12)}」")
+            }
+
+            sent += segment
+            ReplyLedger.record(segment)
+
+            if (index < segments.lastIndex) {
+                // 真人打字节奏：1.5~3 秒一条
+                delay(Random.nextLong(1_500L, 3_001L))
+            }
+        }
+
+        // 一次“回复动作”只记一次账：限流按「回合」算，而不是按气泡数算，
+        // 否则一条回复被拆成 2~3 段就会把自己的 30 秒限额吃满。
+        runCatching {
+            AgentRuntime.rateLimiter.record(
+                type = SocialActionType.REPLY_MESSAGE,
+                targetKey = conversation,
+                summary = "给「$conversation」发消息：${sent.joinToString("").take(20)}",
+                textHash = SocialContext.stableHash("$conversation|$text")
             )
         }
-        delay(500)
 
-        // ④ 点发送
-        if (!tapSend(service)) {
-            return ExecResult.fail("没有找到“发送”按钮，QQ 界面可能改版了", ErrorCategory.NODE_NOT_FOUND)
-        }
-        delay(1500)
+        return ExecResult.ok(
+            "已在「$conversation」按 ${sent.size} 条发送：${sent.joinToString(" / ").take(60)}"
+        )
+    }
 
-        // ⑤ 校验：消息必须出现在非输入框节点里，且输入框已被清空
-        val after = service.snapshot()
-        val snippet = text.take(24)
-        val stillInInput = after.nodes.any { node ->
-            node.editable && (node.text.contains(snippet, ignoreCase = true))
+    private fun partial(conversation: String, sent: List<String>, reason: String): ExecResult {
+        val detail = if (sent.isEmpty()) {
+            "发送失败：$reason"
+        } else {
+            "已发出 ${sent.size} 条（${sent.joinToString(" / ").take(40)}），后续失败：$reason"
         }
-        val appeared = after.nodes.any { node ->
+        return ExecResult.fail(detail, ErrorCategory.SCREEN_STATE_DRIFT)
+    }
+
+    private fun appeared(snapshot: UiSnapshot, segment: String): Boolean {
+        val snippet = segment.take(12)
+        if (snippet.isBlank()) return true
+        return snapshot.nodes.any { node ->
             !node.editable && (
                 node.text.contains(snippet, ignoreCase = true) ||
                     node.label.contains(snippet, ignoreCase = true)
                 )
         }
-        if (stillInInput || !appeared) {
-            return ExecResult.fail(
-                "点了发送，但界面上没有出现这条消息，可能没有发送成功",
-                ErrorCategory.SCREEN_STATE_DRIFT
-            )
-        }
-
-        ReplyLedger.record(text)
-        return ExecResult.ok("已通过界面操作在「$conversation」发送：${text.take(30)}")
     }
 
     // ────────────────────────── 内部步骤 ──────────────────────────
@@ -142,10 +177,8 @@ object QqReplyFlow {
         service: WhaleAccessibilityService,
         conversation: String
     ): Boolean {
-        // 已经在目标会话里
         if (service.hasEditable() && service.snapshot().containsText(conversation)) return true
 
-        // 会话列表里直接可见
         if (service.tapByText(conversation, exact = false)) {
             delay(900)
             if (service.hasEditable()) return true

@@ -129,8 +129,9 @@ class MainActivity : AppCompatActivity() {
     private fun autoConnect() {
         val host = prefs.getString(KEY_HOST, null)
         val token = prefs.getString(KEY_TOKEN, null)
+        val pairCode = prefs.getString(KEY_PAIR_CODE, "") ?: ""
         if (!host.isNullOrBlank() && !token.isNullOrBlank()) {
-            connect(host, token)
+            connect(host, token, pairCode)
         }
     }
 
@@ -143,6 +144,8 @@ class MainActivity : AppCompatActivity() {
 
         etHost.setText(prefs.getString(KEY_HOST, ""))
         etToken.setText(prefs.getString(KEY_TOKEN, ""))
+        view.findViewById<EditText>(R.id.etDialogPairCode)
+            .setText(prefs.getString(KEY_PAIR_CODE, ""))
 
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.connect_title)
@@ -179,13 +182,19 @@ class MainActivity : AppCompatActivity() {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val host = etHost.text.toString().trim()
                 val token = etToken.text.toString().trim()
+                val pairCode = view.findViewById<EditText>(R.id.etDialogPairCode)
+                    .text.toString().trim().uppercase()
                 if (host.isEmpty() || token.isEmpty()) {
-                    tvDialogStatus.text = "地址和配对码都要填"
+                    tvDialogStatus.text = "地址和令牌/配对码都要填"
                     return@setOnClickListener
                 }
-                prefs.edit().putString(KEY_HOST, host).putString(KEY_TOKEN, token).apply()
+                prefs.edit()
+                    .putString(KEY_HOST, host)
+                    .putString(KEY_TOKEN, token)
+                    .putString(KEY_PAIR_CODE, pairCode)
+                    .apply()
                 dialog.dismiss()
-                connect(host, token)
+                connect(host, token, pairCode)
             }
         }
         dialog.setOnDismissListener {
@@ -195,14 +204,35 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun connect(host: String, token: String) {
+    private fun connect(host: String, token: String, pairCode: String = "") {
         disconnect()
         updateStatus(getString(R.string.status_connecting))
 
-        val hostPort = if (host.contains(':')) host else "$host:8787"
+        // 有配对码或地址是 ws(s):// → 走公网中继；否则按局域网直连处理
+        val relayMode = pairCode.isNotBlank() ||
+            host.startsWith("ws://") || host.startsWith("wss://")
+        val url = when {
+            host.startsWith("ws://") || host.startsWith("wss://") -> host
+            relayMode -> "wss://$host/ws"
+            host.contains(':') -> "ws://$host"
+            else -> "ws://$host:8787"
+        }
+        val deviceId = runCatching {
+            android.provider.Settings.Secure.getString(
+                contentResolver,
+                android.provider.Settings.Secure.ANDROID_ID
+            )
+        }.getOrNull().orEmpty()
+
         val listener = object : CompanionClient.Listener {
             override fun onConnected() {
-                runOnUiThread { updateStatus(getString(R.string.status_connecting)) }
+                runOnUiThread {
+                    updateStatus(
+                        if (relayMode) "已连接（中继）· 配对码 $pairCode"
+                        else getString(R.string.status_connecting)
+                    )
+                    if (relayMode) appendSystem("已通过中继连接，配对码 $pairCode")
+                }
             }
 
             override fun onDisconnected(reason: String) {
@@ -224,7 +254,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val c = runCatching { CompanionClient("ws://$hostPort", token, listener) }.getOrElse {
+        val c = runCatching {
+            CompanionClient(
+                url = url,
+                token = token,
+                listener = listener,
+                relayMode = relayMode,
+                pairCode = pairCode,
+                deviceId = deviceId
+            )
+        }.getOrElse {
             updateStatus(getString(R.string.status_error))
             appendSystem("地址格式不对：${it.message}")
             return
@@ -255,8 +294,21 @@ class MainActivity : AppCompatActivity() {
                 val status = json.optString("status")
                 val step = json.optInt("step")
                 val max = json.optInt("maxSteps")
+                val detail = json.optString("detail")
                 val budget = if (max > 0) max.toString() else "∞"
-                tvStatus.text = "已连接 · $status" + if (step > 0) " · 第 $step/$budget 步" else ""
+                tvStatus.text = buildString {
+                    append("已连接 · ").append(statusLabel(status))
+                    if (step > 0) append(" · 第 ").append(step).append('/').append(budget).append(" 步")
+                    if (detail.isNotBlank()) append(" · ").append(detail.take(24))
+                }
+            }
+
+            Protocol.TYPE_STEP -> {
+                val record = json.optJSONObject("record")
+                val error = record?.optString("errorDetail").orEmpty()
+                if (error.isNotBlank()) {
+                    appendSystem("⚠️ ${record?.optString("errorCategory").orEmpty()}：${error.take(80)}")
+                }
             }
 
             Protocol.TYPE_MESSAGE -> {
@@ -276,7 +328,7 @@ class MainActivity : AppCompatActivity() {
                 "错误：${json.optString("code")} ${json.optString("message")}"
             )
 
-            Protocol.TYPE_PONG, Protocol.TYPE_STEP -> Unit
+            Protocol.TYPE_PONG -> Unit
 
             else -> Unit
         }
@@ -312,9 +364,14 @@ class MainActivity : AppCompatActivity() {
         }
         etInput.setText("")
         appendText(text, mine = true)
-        val mode = if (taskMode) Protocol.MODE_TASK else Protocol.MODE_CHAT_ONLY
-        runCatching { c.sendChat(text, mode) }
-            .onFailure { appendSystem("发送失败：${it.message}") }
+        runCatching {
+            if (taskMode) {
+                // 明确意图：COMMAND 直接在手机端 startTask()，不再经过聊天/任务判断
+                c.sendCommand(text)
+            } else {
+                c.sendChat(text, Protocol.MODE_CHAT_ONLY)
+            }
+        }.onFailure { appendSystem("发送失败：${it.message}") }
     }
 
     private fun showAttachmentChooser() {
@@ -492,6 +549,16 @@ class MainActivity : AppCompatActivity() {
         tvStatus.text = text
     }
 
+    private fun statusLabel(status: String): String = when (status) {
+        Protocol.STATUS_THINKING -> "思考中"
+        Protocol.STATUS_EXECUTING -> "正在操作"
+        Protocol.STATUS_WAITING -> "等待确认"
+        Protocol.STATUS_IDLE -> "空闲"
+        "ACTING" -> "执行中"
+        "PAUSED" -> "已暂停"
+        else -> status
+    }
+
     private fun toast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
@@ -499,6 +566,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val KEY_HOST = "last_host"
         private const val KEY_TOKEN = "last_token"
+        private const val KEY_PAIR_CODE = "last_pair_code"
         private const val MENU_CONNECT = 1
         private const val MENU_BG = 2
         private const val MENU_BG_RESET = 3

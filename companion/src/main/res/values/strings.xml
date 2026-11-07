@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">鲸鱼娘 · 伴侣</string>
+    <string name="app_name">鲸鱼娘·遥控</string>
 
     <string name="status_disconnected">未连接 · 点这里设置</string>
     <string name="status_connecting">连接中…</string>
@@ -18,11 +18,12 @@
     <string name="menu_disconnect">断开连接</string>
     <string name="menu_connect">连接手机</string>
 
-    <string name="connect_title">连接手机端</string>
-    <string name="connect_host_hint">手机 IP:端口，例如 192.168.1.5:8787</string>
-    <string name="connect_token_hint">配对码（手机端设置页可查看）</string>
-    <string name="connect_discover">搜索附近设备（同 Wi-Fi）</string>
+    <string name="connect_title">连接鲸鱼娘</string>
+    <string name="connect_host_hint">直连 IP:8787 ｜ 中继 wss://服务器/ws</string>
+    <string name="connect_token_hint">直连填手机配对码；走中继填中继令牌</string>
+    <string name="connect_discover">查找局域网设备（直连时可选）</string>
     <string name="connect_action">连接</string>
+    <string name="connect_pair_hint">中继配对码（直连留空）</string>
     <string name="cancel">取消</string>
 
     <string name="attach_title">发送给鲸鱼娘</string>

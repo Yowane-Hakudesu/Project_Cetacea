@@ -1,0 +1,16 @@
+{
+  "name": "whale-chan-relay",
+  "version": "0.4.0",
+  "private": true,
+  "description": "鲸鱼娘公网中继：按配对码在手机端与遥控端之间转发 WebSocket 消息",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

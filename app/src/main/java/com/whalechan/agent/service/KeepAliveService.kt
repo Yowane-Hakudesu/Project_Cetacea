@@ -63,9 +63,9 @@ class KeepAliveService : Service() {
         observeAgent()
         startHeartbeat()
 
-        // 远程伴侣：服务常驻时同步拉起 WebSocket 服务端
+        // 远程伴侣：本地服务端或公网中继，任一启用就拉起
         val settings = AgentRuntime.settings.load()
-        if (settings.wsEnabled) {
+        if (settings.wsEnabled || settings.relayEnabled) {
             WsHub.start(this, settings.wsPort)
         }
     }
@@ -159,6 +159,7 @@ class KeepAliveService : Service() {
     }
 
     private fun observeAgent() {
+        var wasRunning = false
         scope.launch {
             AgentRuntime.engine.state.collect { state ->
                 if (state.running) {
@@ -183,7 +184,13 @@ class KeepAliveService : Service() {
                 } else {
                     updateNotification(getString(R.string.notif_keepalive_idle))
                     if (!AgentRuntime.settings.load().aggressiveWakeLock) releaseWakeLock()
+
+                    // 任务刚结束：取出“专注时”攒下的消息，按顺序继续处理
+                    if (wasRunning && !AgentRuntime.engine.userStopped) {
+                        drainInbox()
+                    }
                 }
+                wasRunning = state.running
             }
         }
 
@@ -191,6 +198,17 @@ class KeepAliveService : Service() {
             AgentRuntime.engine.events.collect { event ->
                 if (event is AgentEvent.Notice) updateNotification(event.text.take(60))
             }
+        }
+    }
+
+    /** 当前任务结束后，从待处理信箱取一条继续；一次只取一条，避免连环轰炸。 */
+    private fun drainInbox() {
+        val next = com.whalechan.agent.notify.PendingInbox.poll() ?: return
+        scope.launch {
+            kotlinx.coroutines.delay(600)
+            if (AgentRuntime.engine.isRunning()) return@launch
+            WhaleLog.i("从待处理信箱取出：${next.conversation}")
+            startTask(this@KeepAliveService, next.goal)
         }
     }
 

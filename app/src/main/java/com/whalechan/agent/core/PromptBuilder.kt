@@ -20,11 +20,21 @@ object PromptBuilder {
         mode: RunMode,
         hint: String,
         hasImage: Boolean,
-        attachmentNote: String = ""
+        attachmentNote: String = "",
+        currentEntity: String? = null,
+        focused: Boolean = false
     ): String = buildString {
         appendLine("【用户目标】")
         appendLine(goal.take(600))
         appendLine()
+
+        // 实体识别放在最前面：模型第一眼就该知道“现在在跟谁说话”
+        if (!currentEntity.isNullOrBlank()) {
+            appendLine("【CurrentEntity】")
+            appendLine("[当前正在与「$currentEntity」对话]")
+            appendLine("所有针对这个会话的回复都只发到这个窗口，不要切到别的聊天。")
+            appendLine()
+        }
 
         appendLine(
             "【模式】" + when (mode) {
@@ -40,6 +50,9 @@ object PromptBuilder {
                 "第 $step 步（不按步数终止：时间窗口 / 无限模式）"
             }
         )
+        if (focused) {
+            appendLine("【专注状态】你正在做自己的事（看视频/刷内容）。不要因为一条通知就切走，先把当前这件事做完。")
+        }
         appendLine()
 
         appendLine("【当前界面】")

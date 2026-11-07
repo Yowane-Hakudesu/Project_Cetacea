@@ -26,8 +26,8 @@ import org.json.JSONObject
  */
 object Protocol {
 
-    const val VERSION = 1
-    const val APP_VERSION = "0.3.1"
+    const val VERSION = 2
+    const val APP_VERSION = "0.4.0"
 
     const val TYPE_HELLO = "hello"
     const val TYPE_HELLO_OK = "hello_ok"
@@ -44,6 +44,23 @@ object Protocol {
     const val TYPE_PING = "ping"
     const val TYPE_PONG = "pong"
     const val TYPE_ATTACHMENT = "attachment"
+
+    // ── 公网中继协议（v2）──
+    const val TYPE_COMMAND = "COMMAND"
+    const val TYPE_REGISTER = "register"
+    const val TYPE_REGISTERED = "registered"
+    const val TYPE_TO_PHONE = "toPhone"
+    const val TYPE_TO_COMPANION = "toCompanion"
+    const val TYPE_FROM_PHONE = "fromPhone"
+    const val TYPE_FROM_COMPANION = "fromCompanion"
+
+    const val ROLE_PHONE = "phone"
+    const val ROLE_COMPANION = "companion"
+
+    const val STATUS_THINKING = "THINKING"
+    const val STATUS_EXECUTING = "EXECUTING_ACTION"
+    const val STATUS_WAITING = "WAITING"
+    const val STATUS_IDLE = "IDLE"
 
     const val MODE_TASK = "TASK"
     const val MODE_CHAT_ONLY = "CHAT_ONLY"
@@ -175,5 +192,60 @@ object Protocol {
         put("size", size)
         put("data", base64)
         put("ts", System.currentTimeMillis())
+    }
+
+    // ────────────────────────── 中继协议（v2）──────────────────────────
+
+    /**
+     * 伴侣端明确意图：把 text 当作任务执行，而不是普通聊天。
+     * C→S→手机：{"type":"COMMAND","text":"去QQ找张三说晚安","id":"..."}
+     */
+    fun command(text: String, id: String): JSONObject = JSONObject().apply {
+        put("type", TYPE_COMMAND)
+        put("text", text)
+        put("id", id)
+        put("ts", System.currentTimeMillis())
+    }
+
+    /** 手机 → 中继 → 伴侣：Agent 当前在做什么。 */
+    fun relayState(status: String, step: Int, maxSteps: Int, detail: String): JSONObject =
+        JSONObject().apply {
+            put("type", TYPE_STATE)
+            put("status", status)
+            put("step", step)
+            put("maxSteps", maxSteps)
+            put("detail", detail.take(200))
+            put("ts", System.currentTimeMillis())
+        }
+
+    fun register(
+        role: String,
+        deviceId: String,
+        pairCode: String,
+        token: String
+    ): JSONObject = JSONObject().apply {
+        put("type", TYPE_REGISTER)
+        put("role", role)
+        put("deviceId", deviceId)
+        put("pairCode", pairCode)
+        put("token", token)
+        put("protocol", VERSION)
+    }
+
+    fun registered(ok: Boolean, role: String, pairCode: String): JSONObject = JSONObject().apply {
+        put("type", TYPE_REGISTERED)
+        put("ok", ok)
+        put("role", role)
+        put("pairCode", pairCode)
+    }
+
+    fun toPhone(payload: JSONObject): JSONObject = JSONObject().apply {
+        put("type", TYPE_TO_PHONE)
+        put("payload", payload)
+    }
+
+    fun toCompanion(payload: JSONObject): JSONObject = JSONObject().apply {
+        put("type", TYPE_TO_COMPANION)
+        put("payload", payload)
     }
 }

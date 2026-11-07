@@ -14,8 +14,8 @@ android {
         applicationId = "com.whalechan.agent"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.3.1"
+        versionCode = 5
+        versionName = "0.4.0"
 
         // 只在真机上运行：无障碍 / 通知监听都依赖真实系统环境
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
