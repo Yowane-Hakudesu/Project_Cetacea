@@ -1,8 +1,5 @@
-# 🐋 Project_Cetacea（鲸鱼娘）— v0.4.0
+# 🐋 Project_Cetacea（鲸类计划）（鲸鱼娘）
 
-> 本文件是**根 README 的候选稿**：复制到仓库根目录并改名为 `README.md` 后，
-> 文中的相对链接（`app/`、`companion/`、`relay/`、`assets/`）才会生效。
-> 复制命令见 [GITHUB-0.4.0.md](GITHUB-0.4.0.md) 第 3 节。
 
 ![Android CI](https://github.com/Yowane-Hakudesu/Project_Cetacea/actions/workflows/android.yml/badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-blue)
